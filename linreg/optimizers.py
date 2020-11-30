@@ -3,6 +3,11 @@ from math import sqrt
 
 
 def sign(x):
+    """
+    Calculates sign(x)
+    :param x: float
+    :return: sign(x)
+    """
     if x < 0.:
         return -1.
     elif x == 0.:
@@ -12,31 +17,60 @@ def sign(x):
 
 
 class SgdOptimizer:
+    """Stochastic gradient descent optimizer."""
     def __init__(self, weights, *args, lr=0.01, l1_penalty=0., l2_penalty=0., **kwargs):
+        """
+        Initialization
+        :param weights: 1-d array weights of optimized model
+        :param args: other unnamed params
+        :param lr: float, learning rate
+        :param l1_penalty: float, penalty for L_1 regularization
+        :param l2_penalty: float, penalty for L_2 regularization
+        :param kwargs: other named params
+        """
         self.lr = lr
         self.l1_penalty = l1_penalty
         self.l2_penalty = l2_penalty
         self.weights = weights
-        self.eps = 1e-8
+        self.eps = 1e-8  # small float value
 
     def _get_grad(self, x, y_true, y_pred):
+        """
+        Calculates gradient on given x, true and predicted y. Regularizations included.
+        :param x: 2-d array, train values
+        :param y_true: 1-d array true values
+        :param y_pred: 1-d array predicted values
+        :return: 1-d array gradient
+        """
         x_t = get_transposed(x)  # X.T
         v = [pred - truth for pred, truth in zip(y_pred, y_true)]
         g = mult_matrix_vector(x_t, v)  # g = X.T * v
 
         g = [el / len(x) for el in g]  # mean gradient
 
-        # L1 and L2 regularisation
+        # L1 and L2 regularization
         return [gr + self.l1_penalty * sign(w) + self.l2_penalty * w for gr, w in zip(g, self.weights)]
 
     def fit_batch(self, x, y_true, y_pred):
+        """
+        Trains weights on given values
+        :param x: 2-d array, train values
+        :param y_true: 1-d array true values
+        :param y_pred: 1-d array predicted values
+        :return: self
+        """
         gradient = self._get_grad(x, y_true, y_pred)
         self._update_w(gradient)
         return self
 
     def _update_w(self, gradient):
+        """
+        Updates weights using given gradient
+        :param gradient: 1-d array gradient
+        :return: self
+        """
         assert len(gradient) == len(self.weights),\
-            f"Gradient and weights size must be equal, but {len(gradient)} != {len(self.weights)}"
+            f"Gradient and weights sizes must be equal, but {len(gradient)} != {len(self.weights)}"
         for i in range(len(self.weights)):
             self.weights[i] -= self.lr * gradient[i]
         return self

@@ -16,6 +16,11 @@ def mult_matrix_vector(matrix, vector):
 
 
 def get_transposed(x):  # [ [1, 2], [3, 5], [7, 8] ] -> [ [1, 3, 7], [2, 5, 8] ]
+    """
+    Returns transposed matrix
+    :param x: 2-d array matrix
+    :return: 2-d array matrix
+    """
     result = []
     n, m = len(x), len(x[0])
     for j in range(m):
@@ -24,8 +29,18 @@ def get_transposed(x):  # [ [1, 2], [3, 5], [7, 8] ] -> [ [1, 3, 7], [2, 5, 8] ]
 
 
 def vec2matrix(v):  # [1, 2, 3] -> [ [1], [2], [3] ]
+    """
+    Makes matrix from given vector
+    :param v: 1-d array vector
+    :return: 2-d array matrix
+    """
     return [[el] for el in v]
 
 
 def matrix2vec(x):  # [ [1, 2], [3, 10] ] -> [1, 2, 3, 10]
+    """
+    Returns flatten matrix
+    :param x: 2-d array matrix
+    :return: 1-d array vector
+    """
     return [el for line in x for el in line]

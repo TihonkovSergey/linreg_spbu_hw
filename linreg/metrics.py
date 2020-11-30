@@ -1,4 +1,10 @@
 def mse(y_true, y_pred):
+    """
+    Calculates mean square error (MSE) for given true and predicted values
+    :param y_true:  1-d array true values
+    :param y_pred: 1-d array predicted values
+    :return: float MSE values
+    """
     assert len(y_true) == len(y_pred),\
         f"Truth and predicted Y sizes must be equal, but {len(y_true)} != {len(y_pred)}"
     value = 0
@@ -9,6 +15,12 @@ def mse(y_true, y_pred):
 
 
 def r2(y_true, y_pred):
+    """
+    Calculates R_2 score for given true and predicted values
+    :param y_true: 1-d array true values
+    :param y_pred: 1-d array predicted values
+    :return: float R_2 values
+    """
     assert len(y_true) == len(y_pred),\
         f"Truth and predicted Y sizes must be equal, but {len(y_true)} != {len(y_pred)}"
 

@@ -9,7 +9,6 @@ class LinearRegression:
         self.w = None
         self.cache: list = []
         self.velocity: list = []
-        self.optimizer_step = None
         self.l1_penalty: float = l1_penalty
         self.l2_penalty: float = l2_penalty
         self.loss_list: list = list()
