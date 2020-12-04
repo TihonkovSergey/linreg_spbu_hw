@@ -5,20 +5,25 @@ from tqdm.notebook import tqdm
 
 
 class LinearRegression:
-    def __init__(self, *args, l1_penalty: float = 0., l2_penalty: float = 0., verbose=2, **kwargs):
+    def __init__(self, optimizer: SgdOptimizer, l1_penalty: float = 0., l2_penalty: float = 0., loss=mse, verbose=2):
         self.w = None
-        self.cache: list = []
-        self.velocity: list = []
         self.l1_penalty: float = l1_penalty
         self.l2_penalty: float = l2_penalty
+        self.loss = loss
         self.loss_list: list = list()
         self.r2_list: list = list()
-        self.optimizer = None
+        self.optimizer = optimizer
         self.verbose = verbose
 
     def _print_debug(self, msg, verbose):
         if verbose < self.verbose:
             print(msg)
+
+    def reset(self):
+        self.loss_list = list()
+        self.r2_list = list()
+        if self.w:
+            self.w = [1 for _ in self.w]
 
     def predict(self, x, bias=True):
         assert self.w, f"w is None, use fit first!"
@@ -32,7 +37,7 @@ class LinearRegression:
 
         return mult_matrix_vector(x_train, self.w)
 
-    def fit(self, x, y, loss_func=mse, optimizer=SgdOptimizer, lr=0.01, iterations=200, bias=True, *args, **kwargs):
+    def fit(self, x, y, iterations=200, bias=True):
         x_train = copy.deepcopy(x)
         assert len(y) == len(x_train), f"X has dim {len(x_train)} but {len(y)} required."
 
@@ -44,17 +49,14 @@ class LinearRegression:
         if not self.w:  # init weights
             self.w = [1 for _ in range(m + 1)]
 
-        self.optimizer = optimizer(self.w, *args, lr=lr,
-                                   l1_penalty=self.l1_penalty,
-                                   l2_penalty=self.l2_penalty,
-                                   **kwargs)
+        self.optimizer.set_weights(self.w)
 
         for it in tqdm(range(iterations)):
             y_pred = self.predict(x_train, bias=False)
-            self.loss_list.append(loss_func(y, y_pred))
+            self.loss_list.append(self.loss(y, y_pred))
             self.r2_list.append(r2(y, y_pred))
 
             self.optimizer.fit_batch(x_train, y, y_pred)
 
-            self._print_debug(f'iteration: {it}, loss: {self.loss_list[-1]:.6f}, r2: {self.r2_list[-1]:.6f}',
+            self._print_debug(f'Iteration: {it}, loss: {self.loss_list[-1]:.6f}, r2: {self.r2_list[-1]:.6f}',
                               verbose=1)

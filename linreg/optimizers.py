@@ -18,10 +18,9 @@ def sign(x):
 
 class SgdOptimizer:
     """Stochastic gradient descent optimizer."""
-    def __init__(self, weights, *args, lr=0.01, l1_penalty=0., l2_penalty=0., **kwargs):
+    def __init__(self, *args, lr=0.01, l1_penalty=0., l2_penalty=0., **kwargs):
         """
         Initialization
-        :param weights: 1-d array weights of optimized model
         :param args: other unnamed params
         :param lr: float, learning rate
         :param l1_penalty: float, penalty for L_1 regularization
@@ -31,8 +30,21 @@ class SgdOptimizer:
         self.lr = lr
         self.l1_penalty = l1_penalty
         self.l2_penalty = l2_penalty
-        self.weights = weights
+        self.weights = None
         self.eps = 1e-8  # small float value
+
+    def set_weights(self, weights):
+        """
+        Sets weights of optimized model.
+        :param weights: 1-d array weights of optimized model
+        :return:
+        """
+        self.weights = weights
+        self._init_arrays()
+        return self
+
+    def _init_arrays(self):
+        pass
 
     def _get_grad(self, x, y_true, y_pred):
         """
@@ -77,9 +89,9 @@ class SgdOptimizer:
 
 
 class AdaGradOptimizer(SgdOptimizer):
-    def __init__(self, weights, *args, lr=0.01, l1_penalty=0., l2_penalty=0., **kwargs):
-        super().__init__(weights, *args, lr=lr, l1_penalty=l1_penalty, l2_penalty=l2_penalty, **kwargs)
-        self.cum_grad = [0 for _ in range(len(weights))]
+    def __init__(self, *args, lr=0.01, l1_penalty=0., l2_penalty=0., **kwargs):
+        super().__init__(*args, lr=lr, l1_penalty=l1_penalty, l2_penalty=l2_penalty, **kwargs)
+        self.cum_grad = None
 
     def fit_batch(self, x, y_true, y_pred):
         gradient = self._get_grad(x, y_true, y_pred)
@@ -92,11 +104,14 @@ class AdaGradOptimizer(SgdOptimizer):
         self._update_w(gradient)
         return self
 
+    def _init_arrays(self):
+        self.cum_grad = [0 for _ in self.weights]
+
 
 class RmsPropOptimizer(SgdOptimizer):
-    def __init__(self, weights, *args, lr=0.01, l1_penalty=0., l2_penalty=0., beta=0.9, **kwargs):
-        super().__init__(weights, *args, lr=lr, l1_penalty=l1_penalty, l2_penalty=l2_penalty, **kwargs)
-        self.cum_grad = [0 for _ in range(len(weights))]
+    def __init__(self, *args, lr=0.01, l1_penalty=0., l2_penalty=0., beta=0.9, **kwargs):
+        super().__init__(*args, lr=lr, l1_penalty=l1_penalty, l2_penalty=l2_penalty, **kwargs)
+        self.cum_grad = None
         self.beta = beta
 
     def fit_batch(self, x, y_true, y_pred):
@@ -110,14 +125,17 @@ class RmsPropOptimizer(SgdOptimizer):
         self._update_w(gradient)
         return self
 
+    def _init_arrays(self):
+        self.cum_grad = [0 for _ in self.weights]
+
 
 class AdamOptimizer(SgdOptimizer):
-    def __init__(self, weights, *args, lr=0.01, l1_penalty=0., l2_penalty=0., beta1=0.9, beta2=0.999, **kwargs):
-        super().__init__(weights, *args, lr=lr, l1_penalty=l1_penalty, l2_penalty=l2_penalty, **kwargs)
+    def __init__(self, *args, lr=0.01, l1_penalty=0., l2_penalty=0., beta1=0.9, beta2=0.999, **kwargs):
+        super().__init__(*args, lr=lr, l1_penalty=l1_penalty, l2_penalty=l2_penalty, **kwargs)
         self.beta1 = beta1
         self.beta2 = beta2
-        self.cum_grad = [0 for _ in range(len(weights))]
-        self.moment = [0 for _ in range(len(weights))]
+        self.cum_grad = None
+        self.moment = None
 
     def fit_batch(self, x, y_true, y_pred):
         gradient = self._get_grad(x, y_true, y_pred)
@@ -130,3 +148,7 @@ class AdamOptimizer(SgdOptimizer):
 
         self._update_w(gradient)
         return self
+
+    def _init_arrays(self):
+        self.cum_grad = [0 for _ in self.weights]
+        self.moment = [0 for _ in self.weights]
